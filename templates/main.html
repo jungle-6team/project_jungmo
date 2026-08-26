@@ -140,7 +140,7 @@
         author,
       ) {
         console.log("makeCard 실행:", title);
-        
+
         let temp = `        <article class="flex items-center gap-4 rounded-lg bg-zinc-200 p-4">
           <div class="min-w-0 flex-1">
             <span class="rounded bg-green-600 px-2 py-1 text-xs text-white">
@@ -148,27 +148,12 @@
             </span>
             <h2 class="mt-2 text-lg font-bold">${title}</h2>
             <p class="truncate text-sm text-zinc-500">
-            ${contnet}
+            ${content}
             </p>
             <p class="mt-5 text-xs text-zinc-400">
               작성자 ${author} · ${month}월 ${day}일 ${time}
             </p>
           </div>
-
-          <h2 class="mt-2 text-lg font-bold">
-            ${title}
-          </h2>
-
-          <p class="truncate text-sm text-zinc-500">
-            ${content}
-          </p>
-
-          <p class="mt-5 text-xs text-zinc-400">
-            작성자 ${author} · ${month}월 ${day}일 ${time}
-          </p>
-
-        </div>
-
         <a
           href="/meetDetail?meet_id=${id}"
           class="flex items-center shrink-0 rounded-full bg-white px-5 py-2 text-medium text-green-600 font-bold"
