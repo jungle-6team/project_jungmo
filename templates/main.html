@@ -10,10 +10,10 @@
     />
   </head>
 
-  <body class="min-h-screen bg-zinc-100 font-sans text-zinc-700">
-    <main class="flex min-h-screen">
+  <body class="h-screen overflow-hidden bg-zinc-100 font-sans text-zinc-700">
+    <main class="flex h-screen min-h-0">
       <!-- 왼쪽 메뉴 -->
-      <aside class="flex w-60 shrink-0 flex-col bg-zinc-200">
+      <aside class="flex h-full w-60 shrink-0 flex-col bg-zinc-200">
         <!-- <div class="bg-zinc-400 px-7 py-4 text-xl font-bold text-white">
         302 반
       </div> -->
@@ -42,7 +42,7 @@
       </aside>
 
       <!-- 오른쪽 콘텐츠 -->
-      <section class="flex-1 min-w-0 p-8">
+      <section class="min-h-0 min-w-0 flex-1 overflow-y-auto p-8">
         <div class="mb-4 flex justify-end">
           <div class="relative">
             <select
@@ -91,14 +91,23 @@
       })
 
       function showMeets() {
+        console.log("showMeets 실행");
+
         $.ajax({
           type: "GET",
           url: "/meets",
           data: { orderType : orderType },
           success: function (response) {
+            console.log("서버 응답:", response);
+
             let meets = response["meets"];
-            console.log(meets);
+
+            console.log("게시글 개수:", meets.length);
+
             for (let i = 0; i < meets.length; i++) {
+              console.log("for문 실행:", i);
+              console.log("현재 게시글:", meets[i]);
+
               makeCard(
                 meets[i]["_id"],
                 meets[i]["title"],
@@ -120,7 +129,7 @@
       function makeCard(
         id,
         title,
-        contnet,
+        content,
         people,
         peopleCapacity,
         month,
@@ -130,8 +139,7 @@
         createdAt,
         author,
       ) {
-        let temp = `        <article class="flex items-end gap-4 rounded-lg bg-white p-4">
-  
+        console.log("makeCard 실행:", title);
 
           <div class="min-w-0 flex-1">
             <span class="rounded bg-green-600 px-2 py-1 text-xs text-white">
@@ -146,16 +154,47 @@
             </p>
           </div>
 
-          <a
-            href="/meetDetail?meet_id=${id}"
-            class="flex items-center shrink-0 rounded-full bg-white px-5 py-2 text-midium text-green-600 font-bold"
-          >
+          <h2 class="mt-2 text-lg font-bold">
+            ${title}
+          </h2>
+
+          <p class="truncate text-sm text-zinc-500">
+            ${content}
+          </p>
+
+          <p class="mt-5 text-xs text-zinc-400">
+            작성자 ${author} · ${month}월 ${day}일 ${time}
+          </p>
+
+        </div>
+
+        <a
+          href="/meetDetail?meet_id=${id}"
+          class="flex items-center shrink-0 rounded-full bg-white px-5 py-2 text-medium text-green-600 font-bold"
+        >
           자세히보기
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="size-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
+
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2.5"
+            stroke="currentColor"
+            class="size-4"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+            />
           </svg>
-          </a>
-        </article>`;
+        </a>
+
+      </article>
+    `;
+
+        console.log("HTML 생성 완료");
+
         $("#cards-box").append(temp);
       }
 
