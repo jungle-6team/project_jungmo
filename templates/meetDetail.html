@@ -26,12 +26,15 @@
 
           <nav class="mt-6 space-y-4 text-sm font-medium">
             <a href="/main" class="block">전체 게시글</a>
-            <a href="#" class="block text-zinc-400">참여한 게시글</a>
+            <a href="/joinMeet" class="block text-zinc-400">참여한 게시글</a>
           </nav>
         </div>
 
         <div class="mt-auto p-5">
-          <button class="w-full rounded bg-white py-2 text-sm font-semibold" onclick="logout()">
+          <button
+            class="w-full rounded bg-white py-2 text-sm font-semibold"
+            onclick="logout()"
+          >
             로그아웃
           </button>
         </div>
@@ -119,20 +122,19 @@
 
       function logout() {
         $.ajax({
-          type:"POST",
-          url:"/api/logout",
-          
-          success: function(response){
-            if(response["result"] == "success"){
+          type: "POST",
+          url: "/api/logout",
+
+          success: function (response) {
+            if (response["result"] == "success") {
               alert("로그아웃 되었습니다.");
               window.location.href = "/login";
-              
             }
           },
-          error : function(xhr) {
+          error: function (xhr) {
             console.log(xhr.status);
             console.log(xhr.responseText);
-          }
+          },
         });
       }
     </script>

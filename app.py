@@ -213,6 +213,12 @@ def post_update_meet():
 
     return jsonify({'result': 'success', 'msg': '수정되었습니다.'})
 
+#참여한 게시물 페이지
+@app.route('/joinMeet')
+@jwt_required()
+def join_meet():
+    name = get_jwt_identity()
+    return render_template('joinMeet.html', user_id=name)
 
 @app.route('/meets', methods=['GET'])
 def read_meets():
@@ -332,6 +338,7 @@ def meet_join():
             }
         )
     return jsonify({'result': 'success'})
+
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5001, debug=True)
