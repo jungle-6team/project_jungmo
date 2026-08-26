@@ -9,7 +9,7 @@
       href="{{ url_for('static', filename='output.css') }}"
     />
   </head>
-
+  <!-- 수정버튼 눌렀을때 ui -->
   <body class="min-h-screen bg-zinc-100 text-zinc-600">
     <main
       class="mx-auto mt-10 flex min-h-[620px] max-w-5xl overflow-hidden border border-zinc-800 bg-white"
@@ -132,25 +132,6 @@
               placeholder="내용을 입력하세요."
               class="h-36 w-full resize-none rounded border-4 border-red-500 bg-zinc-100 p-3 text-sm placeholder:text-zinc-400 focus:ring-1 focus:ring-zinc-400"
             ></textarea>
-          </div>
-
-          <!-- 이미지 업로드 -->
-          <div>
-            <label for="image" class="mb-1 block text-xs">이미지 첨부</label>
-            <label
-              for="image"
-              class="flex h-20 cursor-pointer items-center justify-center gap-3 rounded border border-zinc-300 text-zinc-400 hover:bg-zinc-50"
-            >
-              <span class="text-2xl">🖼</span>
-              <span class="font-semibold">이미지 업로드</span>
-            </label>
-            <input
-              id="image"
-              name="image"
-              type="file"
-              accept="image/*"
-              class="hidden"
-            />
           </div>
 
           <!-- 하단 -->
