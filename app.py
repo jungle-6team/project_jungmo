@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request, render_template
 
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required, unset_jwt_cookies
 from dotenv import load_dotenv
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 
@@ -151,7 +151,8 @@ def meets_detail():
 def post_MakeMeet():
     title_receive = request.form['title_give']
     content_receive = request.form['content_give']
-    people_receive = request.form['people_give']
+    people_receive = 1
+    peopleCapacity_receive = request.form['peopleCapacity_give']
     month_receive = request.form['month_give']
     day_receive = request.form['day_give']
     time_receive = request.form['time_give']
@@ -162,13 +163,17 @@ def post_MakeMeet():
     meet = {
         'title': title_receive,
         'content': content_receive,
-        'people': people_receive,
+        'people' : people_receive,
+        'peopleCapacity': peopleCapacity_receive,
         'month': month_receive,
         'day': day_receive,
         'time': time_receive,
         'closeWhenFull': closeWhenFull_receive,
         'author': author,
-        'createdAt': datetime.now()
+        'user_id': author,
+        'user_ids': [author],
+        'createdAt': datetime.now(),
+        'visible' : True,
     }
     db.meet.insert_one(meet)
     return jsonify({'result': 'success', 'msg': 'success'})
@@ -203,15 +208,50 @@ def post_update_meet():
 
 @app.route('/meets', methods=['GET'])
 def read_meets():
-    result = list(db.meet.find({}).sort('createdAt', -1))
+    order_type = request.args.get('orderType', 'latest')
+
+    if order_type == 'participants':
+        result = list(
+            db.meet.find({'visible': True}).sort('people', -1)
+        )
+    else:
+        result = list(
+            db.meet.find({'visible': True}).sort('createdAt', -1)
+        )
 
     for meet in result:
         meet['_id'] = str(meet['_id'])
         meet['createdAt'] = meet['createdAt'].strftime('%Y.%m.%d %H:%M')
 
-    return jsonify({'result': 'success', 'meets': result})
+    return jsonify({
+        'result': 'success',
+        'meets': result
+    })
+    
 
+@app.route('/joinMeets', methods=['GET'])
+@jwt_required()
+def read_join_meets():
+    user_id = request.args.get('user_id')
+    order_type = request.args.get('orderType', 'latest')
 
+    query = db.meet.find({'user_ids': user_id})
+
+    if order_type == "latest":
+        query = query.sort("createdAt", -1)
+    else:
+        query = query.sort("people", -1)
+
+    result = list(query)
+
+    for meet in result:
+        meet['_id'] = str(meet['_id'])
+        meet['createdAt'] = meet['createdAt'].strftime('%Y.%m.%d %H:%M')
+
+    return jsonify({
+        'result': 'success',
+        'meets': result
+    })
 
 @app.route('/meetData', methods=['GET'])
 def get_meet_data():
@@ -243,7 +283,47 @@ def meet_delete():
 
     return jsonify({'result': 'success', 'msg': '삭제되었습니다.'})
 
+@app.route('/post/join', methods=['POST'])
+@jwt_required()
+def meet_join():
+    meet_id = request.form.get('meet_id')
+    user_id = request.form.get('user_id')
 
+    if not meet_id:
+        return jsonify({'result': 'error', 'msg': 'meet_id가 없습니다.'})
+
+    meet = db.meet.find_one_and_update(
+        {
+            '_id': ObjectId(meet_id),
+            'user_ids': {'$ne': user_id},
+            '$expr': {'$lt': ['$people', '$peopleCapacity']}
+        },
+        {
+            '$inc': {'people': 1},
+            '$addToSet': {'user_ids': user_id}
+        },
+        return_document=ReturnDocument.AFTER
+    )
+
+    if meet is None:
+        return jsonify({
+            'result': 'fail',
+            'msg': '이미 참여했거나 모집이 마감되었습니다.'
+        })
+
+    if meet['people'] == meet['peopleCapacity']:
+        db.meet.find_one_and_update(
+            {
+                '_id': ObjectId(meet_id),
+                'visible': True
+            },
+            {
+                '$set': {
+                    'visible': False
+                }
+            }
+        )
+    return jsonify({'result': 'success'})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5001, debug=True)
