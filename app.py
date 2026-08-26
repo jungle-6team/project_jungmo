@@ -287,14 +287,24 @@ def get_meet_data():
 
 
 @app.route('/post/delete', methods=['DELETE'])
+@jwt_required()
 def meet_delete():
     meet_id = request.form.get('meet_id')
 
     if not meet_id:
         return jsonify({'result': 'error', 'msg': 'meet_id가 없습니다.'}), 400
+    meet = db.meet.find_one({
+        '_id':ObjectId(meet_id)
+    })
 
+    current_user = get_jwt_identity()
+    if meet['author'] != current_user:
+        return jsonify({
+            'result':'fail',
+            'msg':'작성자만 삭제할 수 있습니다'
+        }), 403
+    
     db.meet.delete_one({'_id': ObjectId(meet_id)})
-
     return jsonify({'result': 'success', 'msg': '삭제되었습니다.'})
 
 @app.route('/post/join', methods=['POST'])
