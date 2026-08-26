@@ -1,7 +1,7 @@
 import os
 from flask import Flask, jsonify, request, render_template
 
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required, unset_jwt_cookies
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
@@ -93,33 +93,36 @@ def checkID():
 # 로그인 API
 @app.route('/api/login', methods=["POST"])
 def login():
-    # print("1. 로그인 함수 진입")
     getID = request.form['id_give']
     getPW = request.form['pw_give']
-    # print("2. id.pw 받음", getID)
     crypted_pw = hashlib.sha256(getPW.encode('utf-8')).hexdigest()
-    # print("3. PW hasing")
     result = db.users.find_one({'id':getID, 'pw':crypted_pw})
-    # print("4. DB searched.")
     if result :
         # JWT 토큰 생성 (timedelta의 매개변수로 유효시간 조절)
-        # print("5. Login Success")
         expires = timedelta(minutes=60)
         access_token = create_access_token(
             identity = getID,
             expires_delta = expires,
         )
-        # print("6. JWT Created.")
         response = jsonify({'result' : 'success', 'msg':'로그인 되었습니다.', "token": access_token})
         response.set_cookie('access_token', access_token, secure = False, samesite = 'Lax')
-        # print("7. Cookies set")
         # return jsonify({'result':'success', 'token':token})
         return response, 200
     else:
-        # print("5 Login Fail")
         return jsonify({'result':'fail','msg':'아이디 또는 비밀번호가 일치하지 않습니다.'})
         # return render_template('login.html', form=form)
 
+# 로그아웃 api
+@app.route('/api/logout', methods = ["POST"])
+def logout():
+    response = jsonify({
+        'result':'success',
+        'msg': '로그아웃 되었습니다'
+    })
+
+    unset_jwt_cookies(response)
+
+    return response, 200
 
 # user ID 메인페이지 
 
