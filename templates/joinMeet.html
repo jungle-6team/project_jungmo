@@ -14,12 +14,8 @@
     <main class="flex h-screen min-h-0">
       <!-- 왼쪽 메뉴 -->
       <aside class="flex h-full w-60 shrink-0 flex-col bg-zinc-200">
-        <!-- <div class="bg-zinc-400 px-7 py-4 text-xl font-bold text-white">
-        302 반
-      </div> -->
-
         <div class="px-5 py-7">
-          <p class="mb-2 text-sm text-zinc-500">{{ name }} 님 환영합니다</p>
+          <p class="mb-2 text-sm text-zinc-500">{{user_id}} 님 환영합니다</p>
 
           <a
             href="/post"
@@ -29,16 +25,15 @@
           </a>
 
           <nav class="mt-6 space-y-4 text-sm font-medium">
-            <a href="#" class="block">전체 게시글</a>
-            <a href="/joinMeet" class="block text-zinc-400">참여한 게시글</a>
+            <a href="/main" class="block text-zinc-400">전체 게시글</a>
+            <a href="/joinMeet" class="block text-zinc-700 font-semibold">
+              참여한 게시글
+            </a>
           </nav>
         </div>
 
         <div class="mt-auto p-5">
-          <button
-            class="w-full rounded bg-white py-2 text-sm font-semibold"
-            onclick="logout()"
-          >
+          <button class="w-full rounded bg-white py-2 text-sm font-semibold">
             로그아웃
           </button>
         </div>
@@ -81,36 +76,30 @@
 
     <script>
       let orderType = "latest";
-
       $(document).ready(function () {
         $("#cards-box").html("");
-        showMeets();
+        showJoinMeets();
       });
 
       $("#sort-select").on("change", function () {
         orderType = $(this).val();
         $("#cards-box").empty();
-        showMeets();
+        showJoinMeets();
       });
 
-      function showMeets() {
-        console.log("showMeets 실행");
-
+      function showJoinMeets() {
+        let user_id = "{{ user_id }}";
         $.ajax({
           type: "GET",
-          url: "/meets",
-          data: { orderType: orderType },
+          url: "/joinMeets",
+          data: {
+            user_id: user_id,
+            orderType: orderType,
+          },
           success: function (response) {
-            console.log("서버 응답:", response);
-
             let meets = response["meets"];
-
-            console.log("게시글 개수:", meets.length);
-
+            console.log(meets);
             for (let i = 0; i < meets.length; i++) {
-              console.log("for문 실행:", i);
-              console.log("현재 게시글:", meets[i]);
-
               makeCard(
                 meets[i]["_id"],
                 meets[i]["title"],
@@ -122,7 +111,7 @@
                 meets[i]["time"],
                 meets[i]["closeWhenFull"],
                 meets[i]["createdAt"],
-                meets[i]["author"],
+                meets[i]["user_id"],
               );
             }
           },
@@ -132,7 +121,7 @@
       function makeCard(
         id,
         title,
-        content,
+        contnet,
         people,
         peopleCapacity,
         month,
@@ -140,35 +129,25 @@
         time,
         closeWhenFull,
         createdAt,
-        author,
+        user_id,
       ) {
-        console.log("makeCard 실행:", title);
+        let temp = `        <article class="flex items-end gap-4 rounded-lg bg-white p-4">
 
-        let temp = `
-    <article class="flex items-end gap-4 rounded-lg bg-white p-4">
-
-      <div class="min-w-0 flex-1">
-
-        <span class="rounded bg-green-600 px-2 py-1 text-xs text-white">
+                <div class="min-w-0 flex-1">
+            <span class="rounded bg-green-600 px-2 py-1 text-xs text-white">
           ${people}인/${peopleCapacity}인
         </span>
+            <h2 class="mt-2 text-lg font-bold">${title}</h2>
+            <p class="truncate text-sm text-zinc-500">
+            ${contnet}
+            </p>
+            <p class="mt-5 text-xs text-zinc-400">
+              작성자 ${user_id} ${month}월 ${day}일 ${time}
+            </p>
+          </div>
 
-        <h2 class="mt-2 text-lg font-bold">
-          ${title}
-        </h2>
-
-        <p class="truncate text-sm text-zinc-500">
-          ${content}
-        </p>
-
-        <p class="mt-5 text-xs text-zinc-400">
-          작성자 ${author} ${month}월 ${day}일 ${time}
-        </p>
-
-      </div>
-
-      <a
-        href="/meetDetail?meet_id=${id}"
+          <a
+        href="/meetDetail?meet_id=${id}&from=joinMeet"
         class="flex shrink-0 items-center rounded-full px-5 py-2 text-medium font-bold text-green-600"
       >
         자세히보기
@@ -190,28 +169,8 @@
 
       </a>
 
-    </article>
-  `;
-
+        </article>`;
         $("#cards-box").append(temp);
-      }
-
-      function logout() {
-        $.ajax({
-          type: "POST",
-          url: "/api/logout",
-
-          success: function (response) {
-            if (response["result"] == "success") {
-              alert("로그아웃 되었습니다.");
-              window.location.href = "/login";
-            }
-          },
-          error: function (xhr) {
-            console.log(xhr.status);
-            console.log(xhr.responseText);
-          },
-        });
       }
     </script>
   </body>
