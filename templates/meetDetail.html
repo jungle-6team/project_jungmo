@@ -110,10 +110,21 @@
           success: function (response) {
             if (response["result"] === "success") {
               window.location.href = "/main";
-            } else {
-              alert(response["msg"]);
-            }
+            } 
+            // else {
+            //   alert(response["msg"]);
+            // }
           },
+          error: function(xhr) {
+            console.log(xhr.status);
+            console.log(xhr.responseText);
+
+            if(xhr.responseJson){
+              alert(xhr.responseJson.msg);
+            }else{
+              alert("삭제 중 오류가 발생했습니다.")
+            }
+          }
         });
       }
 
