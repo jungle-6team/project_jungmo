@@ -31,7 +31,7 @@
         </div>
 
         <div class="mt-auto p-5">
-          <button class="w-full rounded bg-white py-2 text-sm font-semibold">
+          <button class="w-full rounded bg-white py-2 text-sm font-semibold" onclick = "logout()">
             로그아웃
           </button>
         </div>
@@ -49,6 +49,7 @@
               type="text"
               placeholder="제목을 입력해주세요."
               class="w-full rounded border border-zinc-300 px-3 py-2 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-500"
+              required
             />
           </div>
 
@@ -97,14 +98,15 @@
             </div>
 
             <div class="w-28">
-              <label for="people" class="mb-1 block text-xs">참여 인원</label>
+              <label for="peopleCapacity" class="mb-1 block text-xs">참여 인원</label>
               <div class="flex items-center gap-2">
                 <input
-                  id="people"
-                  name="people"
+                  id="peopleCapacity"
+                  name="peopleCapacity"
                   type="number"
                   min="1"
                   class="w-20 rounded border border-zinc-300 px-2 py-2 text-sm"
+                  required
                 />
                 <span class="text-sm">명</span>
               </div>
@@ -119,6 +121,7 @@
               name="content"
               placeholder="내용을 입력하세요."
               class="h-36 w-full resize-none rounded border border-zinc-300 p-3 text-sm outline-none placeholder:text-zinc-400 focus:ring-1 focus:ring-zinc-400"
+              required
             ></textarea>
           </div>
 
@@ -171,7 +174,7 @@
 
         let title = $("#title").val();
         let content = $("#content").val();
-        let people = $("#people").val();
+        let peopleCapacity = $("#peopleCapacity").val();
         let month = $("#month").val();
         let day = $("#day").val();
         let time = $("#time").val();
@@ -183,7 +186,7 @@
           data: {
             title_give: title,
             content_give: content,
-            people_give: people,
+            peopleCapacity_give: peopleCapacity,
             month_give: month,
             day_give: day,
             time_give: time,
@@ -193,13 +196,32 @@
             console.log(response);
 
             if (response["result"] === "success") {
-              window.location.href = "/";
+              window.location.href = "/main";
             } else {
               alert("등록에 실패했습니다.");
             }
           },
         });
       });
+
+      function logout() {
+        $.ajax({
+          type:"POST",
+          url:"/api/logout",
+          
+          success: function(response){
+            if(response["result"] == "success"){
+              alert("로그아웃 되었습니다.");
+              window.location.href = "/login";
+              
+            }
+          },
+          error : function(xhr) {
+            console.log(xhr.status);
+            console.log(xhr.responseText);
+          }
+        });
+      }
     </script>
   </body>
 </html>
