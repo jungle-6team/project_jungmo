@@ -159,7 +159,7 @@ def post_MakeMeet():
     title_receive = request.form['title_give']
     content_receive = request.form['content_give']
     people_receive = 1
-    peopleCapacity_receive = request.form['peopleCapacity_give']
+    peopleCapacity_receive = int(request.form['peopleCapacity_give'])
     month_receive = request.form['month_give']
     day_receive = request.form['day_give']
     time_receive = request.form['time_give']
@@ -311,6 +311,9 @@ def meet_delete():
 def meet_join():
     meet_id = request.form.get('meet_id')
     user_id = request.form.get('user_id')
+
+    print(meet_id)
+    print(user_id)
 
     if not meet_id:
         return jsonify({'result': 'error', 'msg': 'meet_id가 없습니다.'})
