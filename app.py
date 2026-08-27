@@ -138,12 +138,11 @@ def post():
 @jwt_required()
 def postUpdate():
     jwt_id = get_jwt_identity()
-    user = db.users.find_one({'id': jwt_id})
     meet_id = request.args.get('meet_id') #수정버튼에서 넘어온게시글ID를 받음
     meet = db.meet.find_one({'_id': ObjectId(meet_id)}) #그 ID에 해당하는 게시글을 mongodb에 가져옴
     if meet['author'] != jwt_id: #현재 로그인한 사용자와 게시글작성자가 같은지 확인
         return "수정 권한이 없습니다.", 403
-    return render_template('postUpdate.html', user_id=user['id'],meet=meet)
+    return render_template('postUpdate.html',name=jwt_id, meet=meet)
 
 # 포스트 글쓰기 페이지
 @app.route('/meetDetail', methods=['GET'])
