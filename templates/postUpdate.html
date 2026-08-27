@@ -10,39 +10,38 @@
     />
   </head>
   <!-- 수정버튼 눌렀을때 ui -->
-  <body class="min-h-screen bg-zinc-100 text-zinc-600">
-    <main
-      class="mx-auto mt-10 flex min-h-[620px] max-w-5xl overflow-hidden border border-zinc-800 bg-white"
-    >
+  <body class="h-screen overflow-hidden bg-zinc-100 font-sans text-zinc-700">
+    <main class="flex h-screen min-h-0">
       <!-- 왼쪽 메뉴 -->
-      <aside class="flex w-60 flex-col bg-zinc-200">
+      <aside class="flex h-full w-60 shrink-0 flex-col bg-zinc-200">
         <div class="px-5 py-7">
-          <p class="mb-3 text-sm font-medium text-white">
-            {{ name }} 님 환영합니다
-          </p>
+          <p class="mb-2 text-sm text-zinc-500">{{ name }} 님 환영합니다</p>
 
           <a
             href="/post"
-            class="block rounded bg-white py-2 text-center text-sm font-semibold text-zinc-400"
+            class="block rounded bg-green-600 py-2 text-center text-sm font-semibold text-white"
           >
             + 글쓰기
           </a>
 
-          <nav class="mt-7 space-y-4 text-sm font-medium">
+          <nav class="mt-6 space-y-4 text-sm font-medium">
             <a href="/main" class="block">전체 게시글</a>
-            <a href="#" class="block text-zinc-400">참여한 게시글</a>
+            <a href="/joinMeet" class="block text-zinc-400">참여한 게시글</a>
           </nav>
         </div>
 
         <div class="mt-auto p-5">
-          <button class="w-full rounded bg-white py-2 text-sm font-semibold" onclick = "logout()">
+          <button
+            class="w-full rounded bg-white py-2 text-sm font-semibold"
+            onclick="logout()"
+          >
             로그아웃
           </button>
         </div>
       </aside>
 
-      <!-- 글 작성 영역 -->
-      <section class="min-w-0 flex-1 px-8 py-10">
+      <!-- 글 수정 영역 -->
+      <section class="flex-1 px-8 py-10 bg-white">
         <form id="meet-form" class="mt-4 space-y-4">
           <!-- 제목 -->
           <div>
@@ -51,18 +50,12 @@
               id="title"
               name="title"
               type="text"
+              value="{{ meet.title }}"
               placeholder="제목을 입력해주세요."
               class="w-full rounded border border-zinc-300 px-3 py-2 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-500"
+              required
             />
           </div>
-          <div
-            style="
-              width: 300px;
-              height: 150px;
-              border: 4px solid red;
-              background: white;
-            "
-          ></div>
 
           <!-- 참여 날짜와 인원 -->
           <div class="flex gap-8">
@@ -102,21 +95,26 @@
                   id="time"
                   name="time"
                   type="time"
-                  value="17:00"
+                  value="{{ meet.time }}"
                   class="rounded border border-zinc-300 px-2 py-2 text-sm"
                 />
               </div>
             </div>
 
             <div class="w-28">
-              <label for="people" class="mb-1 block text-xs">참여 인원</label>
+              <label for="peopleCapacity" class="mb-1 block text-xs">
+                참여 인원
+              </label>
+
               <div class="flex items-center gap-2">
                 <input
-                  id="people"
-                  name="people"
+                  id="peopleCapacity"
+                  name="peopleCapacity"
                   type="number"
                   min="1"
+                  value="{{ meet.people }}"
                   class="w-20 rounded border border-zinc-300 px-2 py-2 text-sm"
+                  required
                 />
                 <span class="text-sm">명</span>
               </div>
@@ -130,8 +128,11 @@
               id="content"
               name="content"
               placeholder="내용을 입력하세요."
-              class="h-36 w-full resize-none rounded border-4 border-red-500 bg-zinc-100 p-3 text-sm placeholder:text-zinc-400 focus:ring-1 focus:ring-zinc-400"
-            ></textarea>
+              class="h-36 w-full resize-none rounded border border-zinc-300 p-3 text-sm outline-none placeholder:text-zinc-400 focus:ring-1 focus:ring-zinc-400"
+              required
+            >
+{{ meet.content }}</textarea
+            >
           </div>
 
           <!-- 하단 -->
@@ -142,15 +143,21 @@
                 name="agree"
                 type="checkbox"
                 class="h-4 w-4 accent-zinc-500"
+                {%
+                if
+                meet.closeWhenFull
+                %}checked{%
+                endif
+                %}
               />
               인원이 모두 모이면 모집 종료하기
             </label>
 
             <button
               type="submit"
-              class="rounded bg-zinc-400 px-10 py-3 text-sm font-semibold text-white hover:bg-zinc-500"
+              class="rounded bg-green-600 px-10 py-3 text-sm font-semibold text-white hover:bg-green-600"
             >
-              작성하기
+              수정하기
             </button>
           </div>
         </form>
@@ -180,7 +187,7 @@
             let meet = response["meet"];
             $("#title").val(meet["title"]);
             $("#content").val(meet["content"]);
-            $("#people").val(meet["people"]);
+            $("#peopleCapacity").val(meet["people"]);
             $("#month").val(meet["month"]);
             $("#time").val(meet["time"]);
             $("#close-when-full").prop("checked", meet["closeWhenFull"]);
@@ -215,7 +222,7 @@
         let meetId = params.get("meet_id");
         let title = $("#title").val();
         let content = $("#content").val();
-        let people = $("#people").val();
+        let people = $("#peopleCapacity").val();
         let month = $("#month").val();
         let day = $("#day").val();
         let time = $("#time").val();
@@ -245,25 +252,6 @@
           },
         });
       });
-
-      function logout() {
-        $.ajax({
-          type:"POST",
-          url:"/api/logout",
-          
-          success: function(response){
-            if(response["result"] == "success"){
-              alert("로그아웃 되었습니다.");
-              window.location.href = "/login";
-              
-            }
-          },
-          error : function(xhr) {
-            console.log(xhr.status);
-            console.log(xhr.responseText);
-          }
-        });
-      }
     </script>
   </body>
 </html>
