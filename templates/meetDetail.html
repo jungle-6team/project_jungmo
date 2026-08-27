@@ -107,7 +107,7 @@
             event.preventDefault();
             let params = new URLSearchParams(window.location.search);
             let meetId = params.get("meet_id");
-            let user_id = "{{ user_id }}";
+            let user_id = "{{ name }}";
             $.ajax({
                 type: "POST",
                 url: "/post/join",
